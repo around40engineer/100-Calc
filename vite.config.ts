@@ -10,5 +10,5 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
-  base: process.env.NODE_ENV === 'production' ? '/kiro/' : '/',
+  base: process.env.NODE_ENV === 'production' ? '/100-Calc/' : '/',
 })
