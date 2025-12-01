@@ -70,7 +70,7 @@ describe('RewardModal', () => {
       expect(screen.getByText('💰 合計')).toBeInTheDocument();
       expect(screen.getByText((content, element) => {
         return element?.tagName === 'SPAN' && 
-               (element?.className.includes('text-4xl') || element?.className.includes('text-5xl')) && 
+               (element?.className.includes('text-xl') || element?.className.includes('text-2xl')) && 
                content.includes('150') && 
                content.includes('pt');
       })).toBeInTheDocument();
@@ -267,7 +267,7 @@ describe('RewardModal', () => {
       expect(screen.getByText('💰 合計')).toBeInTheDocument();
       expect(screen.getByText((content, element) => {
         return element?.tagName === 'SPAN' && 
-               (element?.className.includes('text-4xl') || element?.className.includes('text-5xl')) && 
+               (element?.className.includes('text-xl') || element?.className.includes('text-2xl')) && 
                content.includes('0') && 
                content.includes('pt');
       })).toBeInTheDocument();
@@ -291,7 +291,7 @@ describe('RewardModal', () => {
       expect(screen.getByText('💰 合計')).toBeInTheDocument();
       expect(screen.getByText((content, element) => {
         return element?.tagName === 'SPAN' && 
-               (element?.className.includes('text-4xl') || element?.className.includes('text-5xl')) && 
+               (element?.className.includes('text-xl') || element?.className.includes('text-2xl')) && 
                content.includes('20') && 
                content.includes('pt');
       })).toBeInTheDocument();
@@ -310,10 +310,10 @@ describe('RewardModal', () => {
       render(<RewardModal isOpen={true} rewards={largePointRewards} onClose={mockOnClose} />);
 
       // Then
-      // 合計ポイントの表示を確認（text-4xl または text-5xl クラスを持つ要素）
+      // 合計ポイントの表示を確認（text-xl または text-2xl クラスを持つ要素）
       expect(screen.getByText((content, element) => {
         return element?.tagName === 'SPAN' && 
-               (element?.className.includes('text-4xl') || element?.className.includes('text-5xl')) && 
+               (element?.className.includes('text-xl') || element?.className.includes('text-2xl')) && 
                content.includes('999,999') && 
                content.includes('pt');
       })).toBeInTheDocument();

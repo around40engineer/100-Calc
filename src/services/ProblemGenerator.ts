@@ -158,25 +158,57 @@ export class ProblemGenerator {
    * レベル設定に基づいて問題を生成
    */
   private static generateProblemFromConfig(config: import('../types').LevelConfig): Problem {
-    const { operationTypes, numberRange } = config;
+    const { operationTypes, numberRange, allowCarryOver, digitConstraint } = config;
     
     // ランダムに演算タイプを選択
     const operation = operationTypes[Math.floor(Math.random() * operationTypes.length)];
     
-    // 数値範囲内でランダムな数値を生成
-    const operand1 = Math.floor(Math.random() * (numberRange.max - numberRange.min + 1)) + numberRange.min;
-    const operand2 = Math.floor(Math.random() * (numberRange.max - numberRange.min + 1)) + numberRange.min;
+    let operand1: number;
+    let operand2: number;
+    let attempts = 0;
+    const maxAttempts = 100;
     
-    // 引き算の場合、負の数にならないように調整
-    if (operation === OperationType.SUBTRACTION && operand1 < operand2) {
-      return {
-        id: this.generateId(),
-        operand1: operand2,
-        operand2: operand1,
-        operation,
-        answer: operand2 - operand1
-      };
-    }
+    do {
+      // 桁数制約がある場合
+      if (digitConstraint) {
+        if (digitConstraint.operand1Digits === 2 && digitConstraint.operand2Digits === 1) {
+          operand1 = Math.floor(Math.random() * (numberRange.max - 10 + 1)) + 10; // 2桁
+          operand2 = Math.floor(Math.random() * 10); // 1桁
+        } else {
+          operand1 = Math.floor(Math.random() * (numberRange.max - numberRange.min + 1)) + numberRange.min;
+          operand2 = Math.floor(Math.random() * (numberRange.max - numberRange.min + 1)) + numberRange.min;
+        }
+      } else {
+        // 数値範囲内でランダムな数値を生成
+        operand1 = Math.floor(Math.random() * (numberRange.max - numberRange.min + 1)) + numberRange.min;
+        operand2 = Math.floor(Math.random() * (numberRange.max - numberRange.min + 1)) + numberRange.min;
+      }
+      
+      // 引き算の場合、負の数にならないように調整
+      if (operation === OperationType.SUBTRACTION && operand1 < operand2) {
+        [operand1, operand2] = [operand2, operand1];
+      }
+      
+      attempts++;
+      
+      // くり上がり/くり下がりのチェック
+      if (allowCarryOver === false) {
+        if (operation === OperationType.ADDITION) {
+          // 足し算でくり上がりなし: 各桁の和が10未満
+          const hasCarryOver = this.hasAdditionCarryOver(operand1, operand2);
+          if (!hasCarryOver) break;
+        } else if (operation === OperationType.SUBTRACTION) {
+          // 引き算でくり下がりなし: 各桁で引けること
+          const hasBorrow = this.hasSubtractionBorrow(operand1, operand2);
+          if (!hasBorrow) break;
+        } else {
+          break; // 掛け算はくり上がり制約なし
+        }
+      } else {
+        break; // くり上がり許可の場合はそのまま
+      }
+      
+    } while (attempts < maxAttempts);
     
     let answer: number;
     switch (operation) {
@@ -198,6 +230,38 @@ export class ProblemGenerator {
       operation,
       answer
     };
+  }
+
+  /**
+   * 足し算でくり上がりがあるかチェック
+   */
+  private static hasAdditionCarryOver(a: number, b: number): boolean {
+    const aStr = a.toString();
+    const bStr = b.toString();
+    const maxLen = Math.max(aStr.length, bStr.length);
+    
+    for (let i = 0; i < maxLen; i++) {
+      const digitA = i < aStr.length ? parseInt(aStr[aStr.length - 1 - i]) : 0;
+      const digitB = i < bStr.length ? parseInt(bStr[bStr.length - 1 - i]) : 0;
+      if (digitA + digitB >= 10) return true;
+    }
+    return false;
+  }
+
+  /**
+   * 引き算でくり下がりがあるかチェック
+   */
+  private static hasSubtractionBorrow(a: number, b: number): boolean {
+    const aStr = a.toString();
+    const bStr = b.toString();
+    const maxLen = Math.max(aStr.length, bStr.length);
+    
+    for (let i = 0; i < maxLen; i++) {
+      const digitA = i < aStr.length ? parseInt(aStr[aStr.length - 1 - i]) : 0;
+      const digitB = i < bStr.length ? parseInt(bStr[bStr.length - 1 - i]) : 0;
+      if (digitA < digitB) return true;
+    }
+    return false;
   }
 
   /**

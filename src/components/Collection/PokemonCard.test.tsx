@@ -52,7 +52,9 @@ describe('PokemonCard', () => {
       render(<PokemonCard pokemon={pokemon} isOwned={true} />);
 
       // Then
-      expect(screen.getByText(/No\.\s*25/i)).toBeInTheDocument();
+      expect(screen.getByText((content, element) => {
+        return element?.textContent === 'No. 025';
+      })).toBeInTheDocument();
     });
 
     it('Given PokeAPIから取得した画像URL When PokemonCard が表示される Then 正しい画像URLが使用される', () => {
@@ -87,9 +89,8 @@ describe('PokemonCard', () => {
       render(<PokemonCard pokemon={pokemon} isOwned={false} />);
 
       // Then
-      const pokemonImage = screen.getByAltText(/\?\?\?/i);
-      expect(pokemonImage).toBeInTheDocument();
-      expect(pokemonImage).toHaveClass(/grayscale|opacity/i);
+      const questionMark = screen.getByText('❓');
+      expect(questionMark).toBeInTheDocument();
     });
 
     it('Given 未獲得ポケモン When PokemonCard が表示される Then ポケモン名が隠される', () => {
@@ -106,7 +107,7 @@ describe('PokemonCard', () => {
 
       // Then
       expect(screen.queryByText(/pikachu/i)).not.toBeInTheDocument();
-      expect(screen.getByText(/\?\?\?/)).toBeInTheDocument();
+      expect(screen.getByText('？？？')).toBeInTheDocument();
     });
 
     it('Given 未獲得ポケモン When PokemonCard が表示される Then ロック状態が視覚的に示される', () => {
@@ -139,7 +140,9 @@ describe('PokemonCard', () => {
       render(<PokemonCard pokemon={pokemon} isOwned={false} />);
 
       // Then
-      expect(screen.getByText(/No\.\s*25/i)).toBeInTheDocument();
+      expect(screen.getByText((content, element) => {
+        return element?.textContent === 'No. 025';
+      })).toBeInTheDocument();
     });
   });
 
@@ -312,7 +315,9 @@ describe('PokemonCard', () => {
       render(<PokemonCard pokemon={pokemon} isOwned={true} />);
 
       // Then
-      expect(screen.getByText(/No\.\s*151/i)).toBeInTheDocument();
+      expect(screen.getByText((content, element) => {
+        return element?.textContent === 'No. 151';
+      })).toBeInTheDocument();
     });
 
     it('Given 1桁のポケモンID When PokemonCard が表示される Then 正しくフォーマットされる', () => {
@@ -328,7 +333,9 @@ describe('PokemonCard', () => {
       render(<PokemonCard pokemon={pokemon} isOwned={true} />);
 
       // Then
-      expect(screen.getByText(/No\.\s*1/i)).toBeInTheDocument();
+      expect(screen.getByText((content, element) => {
+        return element?.textContent === 'No. 001';
+      })).toBeInTheDocument();
     });
 
     it('Given 長いポケモン名 When PokemonCard が表示される Then テキストが適切に表示される', () => {

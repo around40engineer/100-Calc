@@ -110,59 +110,62 @@ function AppContent() {
 
     return (
       <nav 
-        className="fixed bottom-0 left-0 right-0 shadow-2xl z-50"
+        className="w-full shadow-2xl px-2 sm:px-4"
         style={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
           background: 'linear-gradient(to right, #dc2626, #eab308, #2563eb)',
-          borderTop: '4px solid #fbbf24'
+          borderTop: '4px solid #fbbf24',
+          zIndex: 9999
         }}
       >
-        <div className="container mx-auto px-2 sm:px-4">
-          <div className="flex justify-around items-center h-20 sm:h-24 min-h-[80px]">
-            <Button
-              onClick={() => setCurrentScreen('home')}
-              variant={currentScreen === 'home' ? 'default' : 'ghost'}
-              className="flex-1 h-16 sm:h-20 min-h-[64px] mx-1 text-base sm:text-lg font-bold rounded-2xl transition-all duration-300"
-              style={currentScreen === 'home' 
-                ? { backgroundColor: '#ffffff', color: '#2563eb', border: '4px solid #fbbf24', transform: 'scale(1.1)' }
-                : { color: '#ffffff' }
-              }
-            >
-              🏠<br className="sm:hidden" /><span className="hidden sm:inline"> </span>ホーム
-            </Button>
-            <Button
-              onClick={() => setCurrentScreen('gacha')}
-              variant={currentScreen === 'gacha' ? 'default' : 'ghost'}
-              className="flex-1 h-16 sm:h-20 min-h-[64px] mx-1 text-base sm:text-lg font-bold rounded-2xl transition-all duration-300"
-              style={currentScreen === 'gacha' 
-                ? { backgroundColor: '#ffffff', color: '#ec4899', border: '4px solid #fbbf24', transform: 'scale(1.1)' }
-                : { color: '#ffffff' }
-              }
-            >
-              🎰<br className="sm:hidden" /><span className="hidden sm:inline"> </span>ガチャ
-            </Button>
-            <Button
-              onClick={() => setCurrentScreen('collection')}
-              variant={currentScreen === 'collection' ? 'default' : 'ghost'}
-              className="flex-1 h-16 sm:h-20 min-h-[64px] mx-1 text-base sm:text-lg font-bold rounded-2xl transition-all duration-300"
-              style={currentScreen === 'collection' 
-                ? { backgroundColor: '#ffffff', color: '#16a34a', border: '4px solid #fbbf24', transform: 'scale(1.1)' }
-                : { color: '#ffffff' }
-              }
-            >
-              📚<br className="sm:hidden" /><span className="hidden sm:inline"> </span>図鑑
-            </Button>
-            <Button
-              onClick={() => setCurrentScreen('stats')}
-              variant={currentScreen === 'stats' ? 'default' : 'ghost'}
-              className="flex-1 h-16 sm:h-20 min-h-[64px] mx-1 text-base sm:text-lg font-bold rounded-2xl transition-all duration-300"
-              style={currentScreen === 'stats' 
-                ? { backgroundColor: '#ffffff', color: '#ea580c', border: '4px solid #fbbf24', transform: 'scale(1.1)' }
-                : { color: '#ffffff' }
-              }
-            >
-              📊<br className="sm:hidden" /><span className="hidden sm:inline"> </span>統計
-            </Button>
-          </div>
+        <div className="flex justify-around items-center h-20 sm:h-24 min-h-[80px]">
+          <Button
+            onClick={() => setCurrentScreen('home')}
+            variant={currentScreen === 'home' ? 'default' : 'ghost'}
+            className="flex-1 h-16 sm:h-20 min-h-[64px] mx-1 text-base sm:text-lg font-bold rounded-2xl transition-all duration-300"
+            style={currentScreen === 'home' 
+              ? { backgroundColor: '#ffffff', color: '#2563eb', border: '4px solid #fbbf24', transform: 'scale(1.1)' }
+              : { color: '#ffffff' }
+            }
+          >
+            🏠<br className="sm:hidden" /><span className="hidden sm:inline"> </span>ホーム
+          </Button>
+          <Button
+            onClick={() => setCurrentScreen('gacha')}
+            variant={currentScreen === 'gacha' ? 'default' : 'ghost'}
+            className="flex-1 h-16 sm:h-20 min-h-[64px] mx-1 text-base sm:text-lg font-bold rounded-2xl transition-all duration-300"
+            style={currentScreen === 'gacha' 
+              ? { backgroundColor: '#ffffff', color: '#ec4899', border: '4px solid #fbbf24', transform: 'scale(1.1)' }
+              : { color: '#ffffff' }
+            }
+          >
+            🎰<br className="sm:hidden" /><span className="hidden sm:inline"> </span>ガチャ
+          </Button>
+          <Button
+            onClick={() => setCurrentScreen('collection')}
+            variant={currentScreen === 'collection' ? 'default' : 'ghost'}
+            className="flex-1 h-16 sm:h-20 min-h-[64px] mx-1 text-base sm:text-lg font-bold rounded-2xl transition-all duration-300"
+            style={currentScreen === 'collection' 
+              ? { backgroundColor: '#ffffff', color: '#16a34a', border: '4px solid #fbbf24', transform: 'scale(1.1)' }
+              : { color: '#ffffff' }
+            }
+          >
+            📚<br className="sm:hidden" /><span className="hidden sm:inline"> </span>図鑑
+          </Button>
+          <Button
+            onClick={() => setCurrentScreen('stats')}
+            variant={currentScreen === 'stats' ? 'default' : 'ghost'}
+            className="flex-1 h-16 sm:h-20 min-h-[64px] mx-1 text-base sm:text-lg font-bold rounded-2xl transition-all duration-300"
+            style={currentScreen === 'stats' 
+              ? { backgroundColor: '#ffffff', color: '#ea580c', border: '4px solid #fbbf24', transform: 'scale(1.1)' }
+              : { color: '#ffffff' }
+            }
+          >
+            📊<br className="sm:hidden" /><span className="hidden sm:inline"> </span>統計
+          </Button>
         </div>
       </nav>
     );
@@ -185,23 +188,11 @@ function AppContent() {
           </div>
         );
       case 'gacha':
-        return (
-          <div className="pb-24 sm:pb-28">
-            <GachaView />
-          </div>
-        );
+        return <GachaView />;
       case 'collection':
-        return (
-          <div className="pb-24 sm:pb-28">
-            <CollectionView />
-          </div>
-        );
+        return <CollectionView />;
       case 'stats':
-        return (
-          <div className="pb-24 sm:pb-28">
-            <StatsView />
-          </div>
-        );
+        return <StatsView />;
       default:
         return <LevelSelector onStart={handleLevelSelect} />;
     }
@@ -212,11 +203,12 @@ function AppContent() {
       className="min-h-screen" 
       style={{ 
         background: 'linear-gradient(to bottom right, #f87171, #fde047, #60a5fa)',
-        minHeight: '100vh'
+        minHeight: '100vh',
+        paddingBottom: currentScreen === 'game' ? '0' : '120px'
       }}
     >
-      {renderNavigation()}
       {renderScreen()}
+      {renderNavigation()}
       
       {/* 報酬モーダル */}
       <RewardModal

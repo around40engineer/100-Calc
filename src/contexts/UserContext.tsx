@@ -140,7 +140,7 @@ function userReducer(state: UserData, action: UserAction): UserData {
       
       // レベルクリア時に次のレベルをアンロック
       let newHighestUnlockedLevel = state.highestUnlockedLevel || 1;
-      if (isCompleted && level < 20) {
+      if (isCompleted && level < 100) {
         const nextLevel = (level + 1) as DifficultyLevel;
         if (nextLevel > newHighestUnlockedLevel) {
           newHighestUnlockedLevel = nextLevel;

@@ -6,7 +6,7 @@ import { determineRarity, getLegendaryIds, getRareIds } from '../utils/pokemonRa
  */
 export class PokeApiService {
   private static readonly BASE_URL = 'https://pokeapi.co/api/v2';
-  private static readonly MAX_POKEMON_ID = 151; // 第一世代のみ使用
+  private static readonly MAX_POKEMON_ID = 1025; // 全ポケモン（第9世代まで）
   private static readonly MAX_RETRIES = 3;
   private static readonly RETRY_DELAY = 1000; // ミリ秒
   private static readonly TIMEOUT = 5000; // ミリ秒

@@ -30,12 +30,7 @@ export function StatsView() {
     0
   ) : 0);
 
-  // 難易度の日本語名
-  const difficultyNames: Record<Difficulty, string> = {
-    [Difficulty.EASY]: '簡単',
-    [Difficulty.NORMAL]: '普通',
-    [Difficulty.HARD]: '難しい'
-  };
+
 
   // レベル統計を取得（1-20）
   const levelStats = userData.levelStats || {};
@@ -139,45 +134,7 @@ export function StatsView() {
         </Card>
       )}
 
-      {/* 難易度別統計カード（旧システム） */}
-      {userData.stats && Object.keys(userData.stats).length > 0 && (
-        <Card data-testid="difficulty-stats-card" className="shadow-xl border-4 border-yellow-400 rounded-3xl overflow-hidden bg-gradient-to-br from-green-500 via-teal-400 to-cyan-500">
-          <CardHeader className="bg-gradient-to-r from-green-600 to-teal-600 text-white border-b-4 border-yellow-300">
-            <CardTitle className="text-2xl sm:text-3xl font-bold drop-shadow-lg">📈 難易度別の記録（旧システム）</CardTitle>
-          </CardHeader>
-          <CardContent data-testid="stats-card" className="p-6 bg-gradient-to-br from-green-200 via-teal-200 to-cyan-200">
-            <div className="overflow-x-auto">
-              <table className="w-full text-base sm:text-lg" role="table">
-                <thead>
-                  <tr className="border-b-4 border-purple-300 bg-purple-50">
-                    <th className="text-left p-4 sm:p-5 font-bold text-gray-800">難易度</th>
-                    <th className="text-left p-4 sm:p-5 font-bold text-gray-800">⏱️ ベストタイム</th>
-                    <th className="text-left p-4 sm:p-5 font-bold text-gray-800">🎯 プレイ回数</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {Object.entries(userData.stats).map(([difficulty, stats]) => (
-                    <tr key={difficulty} className="border-b-2 border-gray-200 hover:bg-purple-50 transition-colors">
-                      <td className="p-4 sm:p-5 font-bold text-gray-800">
-                        {difficulty === Difficulty.EASY && '🌟 '}
-                        {difficulty === Difficulty.NORMAL && '⚡ '}
-                        {difficulty === Difficulty.HARD && '🔥 '}
-                        {difficultyNames[difficulty as Difficulty]}
-                      </td>
-                      <td className="p-4 sm:p-5 font-semibold text-gray-700">
-                        {formatTime(stats.bestTime)}
-                      </td>
-                      <td className="p-4 sm:p-5 font-semibold text-gray-700">
-                        {stats.totalPlays}回
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+
     </div>
   );
 }

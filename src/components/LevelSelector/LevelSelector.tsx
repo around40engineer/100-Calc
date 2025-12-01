@@ -80,7 +80,7 @@ export function LevelSelector({ onStart }: LevelSelectorProps) {
         key={level}
         onClick={() => handleLevelSelect(level)}
         disabled={!isUnlocked || isLoading}
-        className={`relative h-32 flex flex-col items-center justify-center p-3 hover:shadow-2xl transform hover:scale-110 hover:-translate-y-1 transition-all duration-300 rounded-2xl border-2 border-white/30 ${getLevelButtonStyle(level)}`}
+        className={`relative h-20 sm:h-24 flex flex-col items-center justify-center p-2 hover:shadow-2xl transform hover:scale-110 hover:-translate-y-1 transition-all duration-300 rounded-xl border-2 border-white/30 text-xs sm:text-sm ${getLevelButtonStyle(level)}`}
       >
         {/* ロック状態 */}
         {!isUnlocked && (
@@ -94,20 +94,15 @@ export function LevelSelector({ onStart }: LevelSelectorProps) {
         {isUnlocked && (
           <>
             {/* レベル番号 */}
-            <div className="text-2xl font-bold mb-1">
-              Lv.{level}
-            </div>
-            
-            {/* レベル名 */}
-            <div className="text-xs font-medium text-center mb-1 line-clamp-1 px-1">
-              {config.name.replace(/^レベル\d+:\s*/, '')}
+            <div className="text-lg sm:text-xl font-bold">
+              {level}
             </div>
             
             {/* クリア状態とスター */}
             {isCleared && (
-              <div className="flex items-center gap-1 mb-1">
-                <Check className="w-4 h-4" />
-                <div className="flex">
+              <div className="flex items-center gap-0.5">
+                <Check className="w-3 h-3" />
+                <div className="flex text-xs">
                   {Array.from({ length: 3 }).map((_, i) => (
                     <span key={i} className={i < stars ? 'text-yellow-300' : 'text-gray-400'}>
                       ★
@@ -116,20 +111,14 @@ export function LevelSelector({ onStart }: LevelSelectorProps) {
                 </div>
               </div>
             )}
-            
-            {/* 制限時間 */}
-            <div className="flex items-center gap-1 text-xs opacity-90">
-              <Clock className="w-3 h-3" />
-              <span>{formatTime(config.timeLimit)}</span>
-            </div>
           </>
         )}
       </Button>
     );
   };
 
-  // 20個のレベルを生成
-  const levels = Array.from({ length: 20 }, (_, i) => (i + 1) as DifficultyLevel);
+  // 100個のレベルを生成
+  const levels = Array.from({ length: 100 }, (_, i) => (i + 1) as DifficultyLevel);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4 sm:p-6">
@@ -143,15 +132,15 @@ export function LevelSelector({ onStart }: LevelSelectorProps) {
           </p>
         </div>
 
-        {/* レベルグリッド（5列×4行） */}
-        <div className="grid grid-cols-5 gap-3 sm:gap-4 bg-gradient-to-br from-yellow-400 via-orange-400 to-red-500 p-4 sm:p-6 rounded-3xl shadow-2xl border-4 border-yellow-300">
+        {/* レベルグリッド（10列×10行） */}
+        <div className="grid grid-cols-10 gap-2 sm:gap-3 bg-gradient-to-br from-yellow-400 via-orange-400 to-red-500 p-4 sm:p-6 rounded-3xl shadow-2xl border-4 border-yellow-300 max-h-[600px] overflow-y-auto">
           {levels.map(level => renderLevelButton(level))}
         </div>
 
         {/* 進捗情報 */}
         <div className="bg-gradient-to-br from-green-500 via-emerald-500 to-teal-600 p-6 rounded-2xl shadow-xl text-center border-4 border-yellow-300 animate-slide-up">
           <p className="text-xl font-bold text-white mb-2 drop-shadow-lg">
-            🏆 クリア済み: <span className="text-3xl text-yellow-300 drop-shadow-lg">{Object.values(userData.levelStats || {}).filter(s => s.cleared).length}</span> / 20
+            🏆 クリア済み: <span className="text-3xl text-yellow-300 drop-shadow-lg">{Object.values(userData.levelStats || {}).filter(s => s.cleared).length}</span> / 100
           </p>
           <p className="text-lg text-white font-semibold drop-shadow-lg">
             🎯 最高レベル: <span className="text-2xl text-yellow-300 drop-shadow-lg">Lv.{userData.highestUnlockedLevel || 1}</span>

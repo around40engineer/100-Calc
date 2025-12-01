@@ -130,6 +130,18 @@ src/
 - ガチャアニメーション
 - 獲得ポケモンの演出
 
+#### StatsView
+- ユーザーの統計情報を表示する画面
+- サマリーカード: 現在のポイント、合計プレイ回数、進捗率を表示
+- レベル別統計テーブル: プレイ済みレベルの詳細情報を表示
+  - レベル名（LevelConfigServiceから取得）
+  - ベストタイム（分秒形式）
+  - プレイ回数
+  - 獲得スター数（0-3）
+  - クリア済みの場合はチェックマーク表示
+- プレイしていないレベルはテーブルに表示しない
+- 時間フォーマット: 60秒未満は「XX秒」、60秒以上は「X分X秒」
+
 ## データモデル
 
 ### 型定義
@@ -146,7 +158,10 @@ enum Difficulty {
 enum OperationType {
   ADDITION = 'addition',
   SUBTRACTION = 'subtraction',
-  MULTIPLICATION = 'multiplication'
+  MULTIPLICATION = 'multiplication',
+  DIVISION = 'division',
+  MODULO = 'modulo',
+  EXPONENTIATION = 'exponentiation'
 }
 
 // レア度
@@ -179,9 +194,10 @@ interface PokeApiPokemon {
 
 // 100マス計算のグリッドデータ
 interface GridData {
-  headerRow: number[];      // 最上部の10個の数字
-  headerColumn: number[];   // 最左部の10個の数字
+  headerRow: number[];      // 最上部の10個の数字（小数を含む場合あり）
+  headerColumn: number[];   // 最左部の10個の数字（小数を含む場合あり）
   operation: OperationType; // 演算タイプ
+  allowDecimal: boolean;    // 小数点を許可するか
 }
 
 // 回答セルの状態
@@ -208,7 +224,7 @@ interface ChallengeSession {
   selectedCell: { row: number; col: number } | null; // 現在選択中のセル
 }
 
-// ユーザー統計
+// ユーザー統計（旧難易度ベース - 後方互換性のため保持）
 interface UserStats {
   [key: string]: {  // difficulty level
     bestTime: number | null;
@@ -217,11 +233,22 @@ interface UserStats {
   };
 }
 
+// レベル統計
+interface LevelStats {
+  level: DifficultyLevel;
+  bestTime: number | null;
+  totalPlays: number;
+  cleared: boolean;
+  stars: number;  // 0-3
+}
+
 // ユーザーデータ
 interface UserData {
   points: number;
   ownedPokemon: number[];  // PokeAPI の pokemon IDs
-  stats: UserStats;
+  stats: UserStats;  // 旧難易度ベースの統計（後方互換性のため保持）
+  levelStats?: { [level: number]: LevelStats };  // レベル別統計（1-20）
+  highestUnlockedLevel?: DifficultyLevel;  // 最高到達レベル
 }
 
 // 報酬タイプ
@@ -723,49 +750,98 @@ class ProblemGenerator {
     };
   }
   
-  // 演算タイプを選択
-  private static selectOperation(difficulty: Difficulty): OperationType {
-    switch (difficulty) {
-      case Difficulty.EASY:
-        // 簡単: 足し算または引き算
-        return Math.random() < 0.5 
-          ? OperationType.ADDITION 
-          : OperationType.SUBTRACTION;
-      case Difficulty.NORMAL:
-        // 普通: 掛け算
-        return OperationType.MULTIPLICATION;
-      case Difficulty.HARD:
-        // 難しい: 足し算、引き算、掛け算のいずれか
-        const rand = Math.random();
-        if (rand < 0.33) return OperationType.ADDITION;
-        if (rand < 0.66) return OperationType.SUBTRACTION;
-        return OperationType.MULTIPLICATION;
+  // 演算タイプを選択（レベルベース）
+  private static selectOperation(level: number): OperationType {
+    if (level <= 10) {
+      // レベル1-10: 足し算または引き算
+      return Math.random() < 0.5 
+        ? OperationType.ADDITION 
+        : OperationType.SUBTRACTION;
+    } else if (level <= 20) {
+      // レベル11-20: 掛け算
+      return OperationType.MULTIPLICATION;
+    } else if (level <= 30) {
+      // レベル21-30: 割り算九九
+      return OperationType.DIVISION;
+    } else if (level <= 40) {
+      // レベル31-40: 答えが10以上の割り算
+      return OperationType.DIVISION;
+    } else if (level <= 50) {
+      // レベル41-50: 剰余計算
+      return OperationType.MODULO;
+    } else if (level <= 60) {
+      // レベル51-60: 小数点の足し算
+      return OperationType.ADDITION;
+    } else if (level <= 70) {
+      // レベル61-70: 指数計算
+      return OperationType.EXPONENTIATION;
+    } else {
+      // レベル71-100: すべての演算をランダムに
+      const operations = [
+        OperationType.ADDITION,
+        OperationType.SUBTRACTION,
+        OperationType.MULTIPLICATION,
+        OperationType.DIVISION,
+        OperationType.MODULO,
+        OperationType.EXPONENTIATION
+      ];
+      return operations[Math.floor(Math.random() * operations.length)];
     }
   }
   
-  // ヘッダー用の数字を生成
-  private static generateHeaderNumbers(difficulty: Difficulty): number[] {
+  // ヘッダー用の数字を生成（レベルベース）
+  private static generateHeaderNumbers(level: number, operation: OperationType): number[] {
     const numbers: number[] = [];
     
-    switch (difficulty) {
-      case Difficulty.EASY:
-        // 簡単: 0-9の1桁
-        for (let i = 0; i < 10; i++) {
-          numbers.push(Math.floor(Math.random() * 10));
-        }
-        break;
-      case Difficulty.NORMAL:
-        // 普通: 1-9の1桁（掛け算なので0を避ける）
-        for (let i = 0; i < 10; i++) {
-          numbers.push(Math.floor(Math.random() * 9) + 1);
-        }
-        break;
-      case Difficulty.HARD:
-        // 難しい: 10-99の2桁
-        for (let i = 0; i < 10; i++) {
+    if (level <= 10) {
+      // レベル1-10: 0-9の1桁
+      for (let i = 0; i < 10; i++) {
+        numbers.push(Math.floor(Math.random() * 10));
+      }
+    } else if (level <= 20) {
+      // レベル11-20: 1-9の1桁（掛け算）
+      for (let i = 0; i < 10; i++) {
+        numbers.push(Math.floor(Math.random() * 9) + 1);
+      }
+    } else if (level <= 30) {
+      // レベル21-30: 割り算九九（1-9）
+      for (let i = 0; i < 10; i++) {
+        numbers.push(Math.floor(Math.random() * 9) + 1);
+      }
+    } else if (level <= 40) {
+      // レベル31-40: 答えが10以上の割り算
+      // 被除数は10-99、除数は1-10
+      for (let i = 0; i < 10; i++) {
+        const divisor = Math.floor(Math.random() * 10) + 1;
+        const quotient = Math.floor(Math.random() * 90) + 10; // 10-99
+        numbers.push(divisor * quotient); // 割り切れる数を生成
+      }
+    } else if (level <= 50) {
+      // レベル41-50: 剰余計算（2-10で割る）
+      for (let i = 0; i < 10; i++) {
+        numbers.push(Math.floor(Math.random() * 90) + 10);
+      }
+    } else if (level <= 60) {
+      // レベル51-60: 小数点の足し算（0.1-9.9）
+      for (let i = 0; i < 10; i++) {
+        numbers.push(Math.round((Math.random() * 9.9 + 0.1) * 10) / 10);
+      }
+    } else if (level <= 70) {
+      // レベル61-70: 指数計算（底2-10、指数2-5）
+      for (let i = 0; i < 10; i++) {
+        numbers.push(Math.floor(Math.random() * 9) + 2);
+      }
+    } else {
+      // レベル71-100: 複雑な計算
+      for (let i = 0; i < 10; i++) {
+        if (operation === OperationType.EXPONENTIATION) {
+          numbers.push(Math.floor(Math.random() * 9) + 2);
+        } else if (operation === OperationType.ADDITION && Math.random() < 0.5) {
+          numbers.push(Math.round((Math.random() * 99.9 + 0.1) * 10) / 10);
+        } else {
           numbers.push(Math.floor(Math.random() * 90) + 10);
         }
-        break;
+      }
     }
     
     return numbers;
@@ -785,6 +861,15 @@ class ProblemGenerator {
         return Math.max(headerRow, headerColumn) - Math.min(headerRow, headerColumn);
       case OperationType.MULTIPLICATION:
         return headerRow * headerColumn;
+      case OperationType.DIVISION:
+        // 割り切れる場合のみ
+        return headerRow / headerColumn;
+      case OperationType.MODULO:
+        // 剰余（余り）
+        return headerRow % headerColumn;
+      case OperationType.EXPONENTIATION:
+        // 指数計算（headerRowを底、headerColumnを指数とする）
+        return Math.pow(headerRow, headerColumn);
     }
   }
   
@@ -829,6 +914,7 @@ interface CalculatorModalProps {
   headerRow: number;
   headerColumn: number;
   operation: OperationType;
+  allowDecimal: boolean; // 小数点入力を許可するか
 }
 
 const CalculatorModal: React.FC<CalculatorModalProps> = ({
@@ -864,6 +950,15 @@ const CalculatorModal: React.FC<CalculatorModalProps> = ({
       case OperationType.ADDITION: return '+';
       case OperationType.SUBTRACTION: return '-';
       case OperationType.MULTIPLICATION: return '×';
+      case OperationType.DIVISION: return '÷';
+      case OperationType.MODULO: return 'mod';
+      case OperationType.EXPONENTIATION: return '^';
+    }
+  };
+  
+  const handleDecimalClick = () => {
+    if (!display.includes('.')) {
+      setDisplay(prev => prev + '.');
     }
   };
   
@@ -896,7 +991,7 @@ const CalculatorModal: React.FC<CalculatorModalProps> = ({
           ))}
         </div>
         
-        {/* 0、削除、決定ボタン */}
+        {/* 0、小数点、削除、決定ボタン */}
         <div className="grid grid-cols-3 gap-2">
           <Button
             onClick={handleDelete}
@@ -912,14 +1007,38 @@ const CalculatorModal: React.FC<CalculatorModalProps> = ({
           >
             0
           </Button>
-          <Button
-            onClick={handleSubmit}
-            className="h-16 text-xl"
-            disabled={!display}
-          >
-            決定
-          </Button>
+          {allowDecimal ? (
+            <Button
+              onClick={handleDecimalClick}
+              className="h-16 text-xl"
+              variant="outline"
+              disabled={display.includes('.')}
+            >
+              .
+            </Button>
+          ) : (
+            <Button
+              onClick={handleSubmit}
+              className="h-16 text-xl"
+              disabled={!display}
+            >
+              決定
+            </Button>
+          )}
         </div>
+        
+        {/* 決定ボタン（小数点がある場合は別行に配置） */}
+        {allowDecimal && (
+          <div className="mt-2">
+            <Button
+              onClick={handleSubmit}
+              className="w-full h-16 text-xl"
+              disabled={!display}
+            >
+              決定
+            </Button>
+          </div>
+        )}
       </SheetContent>
     </Sheet>
   );
@@ -931,7 +1050,7 @@ const CalculatorModal: React.FC<CalculatorModalProps> = ({
 ```typescript
 class PokeApiService {
   private static readonly BASE_URL = 'https://pokeapi.co/api/v2';
-  private static readonly MAX_POKEMON_ID = 151; // 第一世代のみ使用
+  private static readonly MAX_POKEMON_ID = 1025; // 全世代（第1世代～第9世代）
   
   // ランダムなポケモンを取得
   static async fetchRandomPokemon(): Promise<Pokemon> {
@@ -962,13 +1081,51 @@ class PokeApiService {
     return Promise.all(promises);
   }
   
-  // IDに基づいてレア度を判定
+  // IDに基づいてレア度を判定（全世代対応）
   private static determineRarity(id: number): Rarity {
-    // 伝説のポケモン（第一世代）
-    const legendaryIds = [144, 145, 146, 150, 151]; // フリーザー、サンダー、ファイヤー、ミュウツー、ミュウ
+    // 伝説のポケモン（全世代の伝説・準伝説・幻のポケモン）
+    const legendaryIds = [
+      // 第1世代
+      144, 145, 146, 150, 151,
+      // 第2世代
+      243, 244, 245, 249, 250, 251,
+      // 第3世代
+      377, 378, 379, 380, 381, 382, 383, 384, 385, 386,
+      // 第4世代
+      480, 481, 482, 483, 484, 485, 486, 487, 488, 489, 490, 491, 492, 493,
+      // 第5世代
+      494, 638, 639, 640, 641, 642, 643, 644, 645, 646, 647, 648, 649,
+      // 第6世代
+      716, 717, 718, 719, 720, 721,
+      // 第7世代
+      785, 786, 787, 788, 789, 790, 791, 792, 800, 801, 802, 807, 808, 809,
+      // 第8世代
+      888, 889, 890, 891, 892, 893, 894, 895, 896, 897, 898,
+      // 第9世代
+      1001, 1002, 1003, 1004, 1007, 1008, 1009, 1010, 1014, 1015, 1016, 1017, 1024, 1025
+    ];
     
-    // レアポケモン（進化系の最終形態など）
-    const rareIds = [3, 6, 9, 65, 68, 76, 94, 130, 131, 143]; // フシギバナ、リザードン、カメックスなど
+    // レアポケモン（各世代の御三家最終進化、準伝説など）
+    const rareIds = [
+      // 第1世代
+      3, 6, 9, 65, 68, 76, 94, 130, 131, 143,
+      // 第2世代
+      154, 157, 160, 181, 196, 197, 230, 242,
+      // 第3世代
+      254, 257, 260, 282, 306, 334, 350, 373,
+      // 第4世代
+      389, 392, 395, 405, 407, 445, 448, 460, 462, 465, 468, 473, 474, 475, 476,
+      // 第5世代
+      497, 500, 503, 508, 510, 512, 514, 516, 518, 521, 523, 526, 528, 530, 534, 537, 542, 545, 547, 549, 553, 555, 558, 560, 563, 565, 567, 569, 571, 573, 576, 579, 581, 584, 586, 589, 591, 593, 596, 598, 601, 604, 606, 609, 612, 614, 615, 617, 621, 623, 625, 626, 628, 630, 632, 635, 637,
+      // 第6世代
+      652, 655, 658, 663, 666, 668, 671, 673, 675, 678, 681, 683, 685, 687, 689, 691, 693, 695, 697, 699, 700, 701, 702, 703, 706, 707, 709, 711, 713, 715,
+      // 第7世代
+      724, 727, 730, 733, 735, 738, 740, 743, 745, 748, 750, 752, 754, 756, 758, 760, 763, 765, 768, 770, 771, 773, 774, 776, 778, 780, 784,
+      // 第8世代
+      812, 815, 818, 823, 826, 828, 830, 832, 834, 836, 838, 839, 841, 842, 844, 845, 847, 849, 851, 853, 855, 858, 861, 862, 863, 865, 867, 869, 870, 873, 874, 875, 876, 879, 880, 881, 882, 883, 884, 887,
+      // 第9世代
+      914, 917, 920, 923, 925, 928, 931, 934, 937, 940, 943, 945, 947, 949, 952, 954, 956, 959, 962, 964, 967, 970, 972, 975, 978, 980, 983, 985, 987, 989, 991, 992, 995, 998, 1000
+    ];
     
     if (legendaryIds.includes(id)) {
       return Rarity.LEGENDARY;
@@ -992,11 +1149,11 @@ class GachaService {
     [Rarity.LEGENDARY]: 0.05     // 5%
   };
   
-  // レア度に基づいてポケモンIDの範囲を決定
+  // レア度に基づいてポケモンIDの範囲を決定（全世代対応）
   private static readonly RARITY_ID_RANGES = {
-    [Rarity.COMMON]: [1, 151],     // 全ポケモンからランダム（伝説・レアを除く）
-    [Rarity.RARE]: [3, 6, 9, 65, 68, 76, 94, 130, 131, 143],
-    [Rarity.LEGENDARY]: [144, 145, 146, 150, 151]
+    [Rarity.COMMON]: [1, 1025],     // 全ポケモンからランダム（伝説・レアを除く）
+    [Rarity.RARE]: [], // PokeApiServiceのrareIdsリストを参照
+    [Rarity.LEGENDARY]: [] // PokeApiServiceのlegendaryIdsリストを参照
   };
   
   static async pull(userPoints: number): Promise<{
@@ -1227,6 +1384,94 @@ class StorageService {
 3. **チート対策**
    - クライアントサイドのみの実装のため完全な対策は困難
    - 基本的な検証（時間の整合性チェックなど）を実装
+
+## レベル設定の詳細
+
+### レベル1-100の構成
+
+アプリケーションは100段階の難易度レベルを提供し、各レベルは特定の数学的概念と難易度に対応します。
+
+**足し算基礎（レベル1-7）**
+- レベル1: 1桁の足し算（くり上がりなし、0-5の範囲）
+- レベル2: 1桁の足し算（くり上がりあり、0-9の範囲）
+- レベル3: 1桁と2桁の足し算（くり上がりなし）
+- レベル4: 1桁と2桁の足し算（くり上がりあり）
+- レベル5: 2桁と2桁の足し算（くり上がりなし）
+- レベル6: 2桁と2桁の足し算（くり上がりあり、答えが2桁）
+- レベル7: 答えが3桁（100以上）になる2桁と2桁の足し算
+
+**引き算基礎（レベル8-14）**
+- レベル8: 1桁同士の引き算（答えが正の数）
+- レベル9: 1桁同士の引き算（答えが負の数を含む）
+- レベル10: 2桁引く1桁の引き算（くり下がりなし）
+- レベル11: 2桁引く1桁の引き算（くり下がりあり）
+- レベル12: 2桁引く2桁の引き算（くり下がりなし）
+- レベル13: 2桁引く2桁の引き算（くり下がりあり）
+- レベル14: 2桁引く2桁の引き算（答えが負の数を含む）
+
+**掛け算基礎（レベル15-20）**
+- レベル15: 1桁×1桁の掛け算（0-9の段、全て）
+- レベル16: 10-15の数×1桁の掛け算
+- レベル17: 16-20の数×1桁の掛け算
+- レベル18: 10-15の数×10の倍数の掛け算
+- レベル19: 16-20の数×10の倍数の掛け算
+- レベル20: 10-20の数×10-20の数の掛け算
+
+**割り算基礎（レベル21-30）**
+- レベル21: 1桁÷1桁の割り算（割り切れる、九九の範囲）
+- レベル22-30: 段階的に複雑化（2桁÷1桁から4桁÷2桁まで、すべて割り切れる）
+
+**剰余（Mod）計算（レベル31-40）**
+- レベル31-40: 1桁から4桁の数を2-100で割った余りを求める計算
+
+**小数点の足し算・引き算（レベル41-50）**
+- レベル41-46: 小数第一位/第二位までの足し算
+- レベル47-50: 小数第一位/第二位までの引き算（負の数を含む）
+
+**小数点の掛け算・割り算（レベル51-60）**
+- レベル51-57: 小数第一位/第二位までの掛け算
+- レベル58-60: 小数第一位/第二位までの割り算（割り切れる）
+
+**指数計算（レベル61-70）**
+- レベル61-70: 2^2から20^2まで、様々な底と指数の組み合わせ
+
+**複合演算（レベル71-80）**
+- レベル71-80: 四則演算、小数、指数、剰余を組み合わせた複雑な問題
+
+**究極の挑戦（レベル81-100）**
+- レベル81-100: すべての演算タイプを含む最高難易度の問題
+
+### レベル設定の実装
+
+各レベルは以下の属性を持ちます：
+
+```typescript
+interface LevelConfig {
+  level: DifficultyLevel;           // レベル番号（1-100）
+  name: string;                     // レベル名
+  timeLimit: number;                // 制限時間（秒）
+  operationTypes: OperationType[];  // 使用する演算タイプ
+  numberRange: { min: number; max: number }; // 数値の範囲
+  pointsMultiplier: number;         // ポイント倍率
+  
+  // オプション属性
+  allowCarryOver?: boolean;         // くり上がりを許可
+  allowBorrow?: boolean;            // くり下がりを許可
+  allowNegative?: boolean;          // 負の数を許可
+  allowDecimal?: boolean;           // 小数を許可
+  decimalPlaces?: number;           // 小数点以下の桁数
+  divisible?: boolean;              // 割り切れる問題のみ
+  divisorRange?: { min: number; max: number }; // 除数の範囲
+  exponentRange?: { min: number; max: number }; // 指数の範囲
+  digitConstraint?: {               // 桁数の制約
+    operand1Digits?: number;
+    operand2Digits?: number;
+  };
+  minResult?: number;               // 答えの最小値
+  maxResult?: number;               // 答えの最大値
+  multipleOf?: number;              // 倍数の制約
+}
+```
 
 ## UI/UXデザイン原則
 

@@ -6,7 +6,7 @@ import { useUser } from '../../contexts/UserContext';
 import { PokeApiService } from '../../services/PokeApiService';
 import { Rarity, type Pokemon } from '../../types';
 
-const TOTAL_POKEMON = 151; // 第一世代のポケモン総数
+const TOTAL_POKEMON = 1025; // 全ポケモン（第9世代まで）
 
 type FilterType = 'all' | Rarity;
 
@@ -110,7 +110,7 @@ export function CollectionView() {
   }
 
   return (
-    <div className="container mx-auto p-4 sm:p-6 space-y-6 animate-pop-in">
+    <div className="mx-auto p-4 sm:p-6 space-y-6 animate-pop-in max-w-7xl">
       {/* 完成度表示 */}
       <Card className="shadow-2xl border-4 border-yellow-400 rounded-3xl overflow-hidden bg-gradient-to-br from-red-500 via-yellow-400 to-blue-500">
         <CardHeader className="bg-gradient-to-br from-green-600 via-emerald-500 to-teal-500 text-white animate-gradient-shift border-b-4 border-yellow-300">

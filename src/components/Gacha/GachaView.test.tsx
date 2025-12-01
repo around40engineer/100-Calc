@@ -216,7 +216,7 @@ describe('GachaView', () => {
 
       // Then
       await waitFor(() => {
-        expect(screen.getByText(/ポケモンを獲得しました/i)).toBeInTheDocument();
+        expect(screen.getByRole('heading', { name: /ポケモンを獲得/i })).toBeInTheDocument();
       });
     });
 
@@ -504,7 +504,7 @@ describe('GachaView', () => {
       await user.click(gachaButton);
 
       await waitFor(() => {
-        expect(screen.getByText(/ポケモンを獲得しました/i)).toBeInTheDocument();
+        expect(screen.getByRole('heading', { name: /ポケモンを獲得/i })).toBeInTheDocument();
       });
 
       // When
@@ -512,7 +512,7 @@ describe('GachaView', () => {
       await user.click(closeButton);
 
       // Then
-      expect(screen.queryByText(/ポケモンを獲得しました/i)).not.toBeInTheDocument();
+      expect(screen.queryByRole('heading', { name: /ポケモンを獲得/i })).not.toBeInTheDocument();
     });
   });
 
@@ -637,7 +637,7 @@ describe('GachaView', () => {
       // Then
       await waitFor(() => {
         expect(screen.queryByText(/エラーが発生しました/i)).not.toBeInTheDocument();
-        expect(screen.getByText(/ポケモンを獲得しました/i)).toBeInTheDocument();
+        expect(screen.getByRole('heading', { name: /ポケモンを獲得/i })).toBeInTheDocument();
       });
     });
   });

@@ -78,43 +78,43 @@ export const RewardModal: React.FC<RewardModalProps> = ({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent 
-        className="sm:max-w-md max-w-[95vw] animate-in fade-in-0 zoom-in-95 duration-500 !bg-white"
+        className="sm:max-w-md max-w-[90vw] max-h-[85vh] overflow-y-auto animate-in fade-in-0 zoom-in-95 duration-500 !bg-white px-4 py-3 sm:px-8 sm:py-6"
         style={{ backgroundColor: '#ffffff', opacity: 1 }}
       >
-        <DialogHeader>
-          <DialogTitle className="text-3xl sm:text-4xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 via-pink-500 to-purple-600 animate-sparkle">
+        <DialogHeader className="pb-0.5">
+          <DialogTitle className="text-base sm:text-2xl font-bold text-center text-purple-600">
             🎉 おめでとう！ 🎉
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6">
+        <div className="space-y-1 sm:space-y-3">
           {/* ポケモン獲得演出 */}
           {pokemon && (
             <div
               data-testid="pokemon-display"
               data-rarity={pokemon.rarity}
-              className={`p-6 sm:p-8 rounded-2xl ${getRarityColor(pokemon.rarity)} animate-in zoom-in-50 duration-500 border-4 ${
-                pokemon.rarity === Rarity.LEGENDARY ? 'border-yellow-400 shadow-2xl' :
-                pokemon.rarity === Rarity.RARE ? 'border-blue-400 shadow-xl' :
-                'border-gray-400 shadow-lg'
+              className={`p-1 sm:p-3 rounded-md sm:rounded-xl ${getRarityColor(pokemon.rarity)} animate-in zoom-in-50 duration-500 border ${
+                pokemon.rarity === Rarity.LEGENDARY ? 'border-yellow-400 shadow-md sm:shadow-xl' :
+                pokemon.rarity === Rarity.RARE ? 'border-blue-400 shadow-sm sm:shadow-lg' :
+                'border-gray-400 shadow-sm'
               }`}
             >
-              <div className="text-center space-y-4">
+              <div className="text-center space-y-0.5">
                 <div className="relative inline-block">
                   <img
                     src={pokemon.imageUrl}
                     alt={pokemon.name}
-                    className="w-48 h-48 sm:w-56 sm:h-56 mx-auto object-contain animate-bounce drop-shadow-2xl"
+                    className="w-[300px] h-[300px] max-w-[300px] max-h-[300px] mx-auto object-contain animate-bounce drop-shadow-md sm:drop-shadow-xl"
                   />
                   {pokemon.rarity === Rarity.LEGENDARY && (
                     <div className="absolute inset-0 animate-pulse-glow rounded-full"></div>
                   )}
                 </div>
-                <div className="bg-white/90 backdrop-blur-sm rounded-xl p-4 shadow-lg">
-                  <p className="text-base text-gray-600 font-semibold">No. {pokemon.id}</p>
-                  <h3 className="text-3xl sm:text-4xl font-bold text-gray-800">{pokemon.japaneseName}</h3>
-                  <p className="text-sm text-gray-500 font-medium">{pokemon.name}</p>
-                  <p className={`text-lg sm:text-xl font-bold tracking-wide ${
+                <div className="bg-white/90 backdrop-blur-sm rounded-sm sm:rounded-lg p-1 sm:p-2 shadow-sm">
+                  <p className="text-[9px] sm:text-sm text-gray-600 font-semibold">No. {pokemon.id}</p>
+                  <h3 className="text-sm sm:text-xl font-bold text-gray-800">{pokemon.japaneseName}</h3>
+                  <p className="text-[9px] sm:text-xs text-gray-500 font-medium">{pokemon.name}</p>
+                  <p className={`text-[10px] sm:text-base font-bold tracking-wide ${
                     pokemon.rarity === Rarity.LEGENDARY
                       ? 'text-yellow-600 animate-sparkle'
                       : pokemon.rarity === Rarity.RARE
@@ -129,18 +129,18 @@ export const RewardModal: React.FC<RewardModalProps> = ({
           )}
 
           {/* 報酬一覧 */}
-          <div className="space-y-3">
-            <h4 className="font-bold text-xl sm:text-2xl text-gray-800">🎁 獲得報酬</h4>
-            <div className="space-y-2">
+          <div className="space-y-0.5 sm:space-y-2">
+            <h4 className="font-bold text-xs sm:text-lg text-gray-800">🎁 獲得報酬</h4>
+            <div className="space-y-0.5">
               {rewards.map((reward, index) => (
                 <div
                   key={`${reward.type}-${index}`}
                   data-testid={`reward-item-${index}`}
-                  className="flex justify-between items-center p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border-2 border-green-300 shadow-md animate-slide-up hover:scale-105 transition-transform"
+                  className="flex justify-between items-center p-1 sm:p-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-sm sm:rounded-lg border border-green-300 shadow-sm animate-slide-up hover:scale-105 transition-transform"
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
-                  <span className="font-bold text-base sm:text-lg text-gray-800">{getRewardTypeName(reward.type)}</span>
-                  <span className="text-xl sm:text-2xl font-bold text-green-600">
+                  <span className="font-bold text-[10px] sm:text-sm text-gray-800">{getRewardTypeName(reward.type)}</span>
+                  <span className="text-[11px] sm:text-base font-bold text-green-600">
                     +{formatPoints(reward.points)} pt
                   </span>
                 </div>
@@ -149,20 +149,20 @@ export const RewardModal: React.FC<RewardModalProps> = ({
           </div>
 
           {/* 合計ポイント */}
-          <div className="border-t-4 border-yellow-400 pt-4 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl p-4 shadow-lg">
+          <div className="border-t border-yellow-400 pt-1 sm:pt-2 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-sm sm:rounded-lg p-1 sm:p-3 shadow-sm">
             <div className="flex justify-between items-center">
-              <span className="text-2xl sm:text-3xl font-bold text-gray-800">💰 合計</span>
-              <span className="text-4xl sm:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-600 animate-pulse">
+              <span className="text-xs sm:text-lg font-bold text-gray-800">💰 合計</span>
+              <span className="text-base sm:text-2xl font-bold text-green-600">
                 {formatPoints(totalPoints)} pt
               </span>
             </div>
           </div>
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="pt-1 sm:pt-2 flex justify-center items-center">
           <Button 
             onClick={onClose} 
-            className="w-full h-16 text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all" 
+            className="w-4/5 h-8 sm:h-11 text-xs sm:text-lg font-bold bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-sm sm:rounded-lg shadow-sm sm:shadow-lg hover:shadow-md sm:hover:shadow-xl transform hover:scale-105 transition-all mx-auto" 
             size="lg"
           >
             閉じる

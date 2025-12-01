@@ -5,9 +5,8 @@ export enum Difficulty {
   HARD = 'hard'
 }
 
-// 新しいレベルシステム（1-20）
-export type DifficultyLevel = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 
-                               11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20;
+// 新しいレベルシステム（1-100）
+export type DifficultyLevel = number & { __brand: 'DifficultyLevel' };
 
 // レベル設定
 export interface LevelConfig {
@@ -20,6 +19,11 @@ export interface LevelConfig {
     max: number;
   };
   pointsMultiplier: number;
+  allowCarryOver?: boolean; // くり上がり・くり下がりを許可するか
+  digitConstraint?: {
+    operand1Digits?: number; // operand1の桁数制限
+    operand2Digits?: number; // operand2の桁数制限
+  };
 }
 
 // 演算タイプ
