@@ -773,4 +773,121 @@ describe('StorageService', () => {
       expect(() => StorageService.saveUserData(userData)).toThrow('Some other error');
     });
   });
+
+  describe('ownedPokemon重複削除マイグレーション', () => {
+    beforeEach(() => {
+      // 各テストの前にモックをリセット
+      vi.restoreAllMocks();
+    });
+
+    it('Given ownedPokemonに重複がある When loadUserData を呼ぶ Then 重複が削除される', () => {
+      // Given
+      const dataWithDuplicates = {
+        points: 200,
+        ownedPokemon: [1, 25, 6, 25, 150, 25, 1], // 重複あり: 1が2回、25が3回
+        stats: {
+          [Difficulty.EASY]: {
+            bestTime: 120,
+            totalPlays: 5,
+            firstClearAchieved: true
+          },
+          [Difficulty.NORMAL]: {
+            bestTime: null,
+            totalPlays: 0,
+            firstClearAchieved: false
+          },
+          [Difficulty.HARD]: {
+            bestTime: null,
+            totalPlays: 0,
+            firstClearAchieved: false
+          }
+        },
+        levelStats: {},
+        highestUnlockedLevel: 1
+      };
+
+      localStorage.setItem('pokemon_math_user_data', JSON.stringify(dataWithDuplicates));
+
+      // When
+      const loaded = StorageService.loadUserData();
+
+      // Then
+      expect(loaded.ownedPokemon).toEqual([1, 25, 6, 150]); // 重複が削除されている
+      expect(loaded.ownedPokemon).toHaveLength(4);
+      
+      // LocalStorageにも保存されていることを確認
+      const saved = JSON.parse(localStorage.getItem('pokemon_math_user_data')!);
+      expect(saved.ownedPokemon).toEqual([1, 25, 6, 150]);
+    });
+
+    it('Given ownedPokemonに重複がない When loadUserData を呼ぶ Then データはそのまま', () => {
+      // Given
+      const dataWithoutDuplicates = {
+        points: 200,
+        ownedPokemon: [1, 25, 6, 150], // 重複なし
+        stats: {
+          [Difficulty.EASY]: {
+            bestTime: 120,
+            totalPlays: 5,
+            firstClearAchieved: true
+          },
+          [Difficulty.NORMAL]: {
+            bestTime: null,
+            totalPlays: 0,
+            firstClearAchieved: false
+          },
+          [Difficulty.HARD]: {
+            bestTime: null,
+            totalPlays: 0,
+            firstClearAchieved: false
+          }
+        },
+        levelStats: {},
+        highestUnlockedLevel: 1
+      };
+
+      localStorage.setItem('pokemon_math_user_data', JSON.stringify(dataWithoutDuplicates));
+
+      // When
+      const loaded = StorageService.loadUserData();
+
+      // Then
+      expect(loaded.ownedPokemon).toEqual([1, 25, 6, 150]);
+      expect(loaded.ownedPokemon).toHaveLength(4);
+    });
+
+    it('Given ownedPokemonが空配列 When loadUserData を呼ぶ Then エラーが発生しない', () => {
+      // Given
+      const dataWithEmptyArray = {
+        points: 0,
+        ownedPokemon: [],
+        stats: {
+          [Difficulty.EASY]: {
+            bestTime: null,
+            totalPlays: 0,
+            firstClearAchieved: false
+          },
+          [Difficulty.NORMAL]: {
+            bestTime: null,
+            totalPlays: 0,
+            firstClearAchieved: false
+          },
+          [Difficulty.HARD]: {
+            bestTime: null,
+            totalPlays: 0,
+            firstClearAchieved: false
+          }
+        },
+        levelStats: {},
+        highestUnlockedLevel: 1
+      };
+
+      localStorage.setItem('pokemon_math_user_data', JSON.stringify(dataWithEmptyArray));
+
+      // When & Then
+      expect(() => StorageService.loadUserData()).not.toThrow();
+      const loaded = StorageService.loadUserData();
+      expect(loaded.ownedPokemon).toEqual([]);
+    });
+  });
 });

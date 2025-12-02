@@ -1,5 +1,6 @@
 import { Card, CardContent } from '../ui/card';
 import { type Pokemon, Rarity } from '../../types';
+import siletteImage from '../../assets/silette.png';
 
 interface PokemonCardProps {
   pokemon: Pokemon;
@@ -73,9 +74,13 @@ export function PokemonCard({ pokemon, isOwned }: PokemonCardProps) {
                 )}
               </>
             ) : (
-              // 未獲得の場合はシルエット
+              // 未獲得の場合はシルエット画像
               <div className="w-full h-full flex items-center justify-center">
-                <div className="text-8xl text-gray-400">❓</div>
+                <img
+                  src={siletteImage}
+                  alt="未獲得"
+                  className="w-full h-full object-contain opacity-50"
+                />
               </div>
             )}
           </div>

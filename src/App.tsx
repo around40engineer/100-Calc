@@ -12,6 +12,10 @@ import { Button } from './components/ui/button';
 import { type DifficultyLevel, type Pokemon, type Reward } from './types';
 import { RewardCalculator } from './services/RewardCalculator';
 import { useUser } from './contexts/UserContext';
+import zukanIcon from './assets/zukan.png';
+import gameIcon from './assets/game.png';
+import gachaIcon from './assets/gacha.png';
+import dataIcon from './assets/data.png';
 
 type Screen = 'home' | 'game' | 'gacha' | 'collection' | 'stats';
 
@@ -116,55 +120,87 @@ function AppContent() {
           bottom: 0,
           left: 0,
           right: 0,
-          background: 'linear-gradient(to right, #dc2626, #eab308, #2563eb)',
-          borderTop: '4px solid #fbbf24',
+          background: 'rgba(0, 0, 0, 0.8)',
+          borderTop: 'none',
           zIndex: 9999
         }}
       >
         <div className="flex justify-around items-center h-20 sm:h-24 min-h-[80px]">
           <Button
             onClick={() => setCurrentScreen('home')}
-            variant={currentScreen === 'home' ? 'default' : 'ghost'}
-            className="flex-1 h-16 sm:h-20 min-h-[64px] mx-1 text-base sm:text-lg font-bold rounded-2xl transition-all duration-300"
-            style={currentScreen === 'home' 
-              ? { backgroundColor: '#ffffff', color: '#2563eb', border: '4px solid #fbbf24', transform: 'scale(1.1)' }
-              : { color: '#ffffff' }
-            }
+            variant="ghost"
+            className="flex-1 h-16 sm:h-20 min-h-[64px] mx-1 transition-all duration-300 flex flex-col items-center justify-center"
+            style={{ 
+              backgroundColor: 'transparent',
+              border: 'none',
+              color: '#ffffff',
+              transform: currentScreen === 'home' ? 'scale(1.1)' : 'scale(1)'
+            }}
           >
-            🏠<br className="sm:hidden" /><span className="hidden sm:inline"> </span>ホーム
+            <img 
+              src={gameIcon} 
+              alt="ホーム" 
+              className="block mb-1" 
+              style={{ width: '42px', height: '42px', maxWidth: '42px', maxHeight: '42px' }}
+            />
+            <span style={{ fontSize: '10px', fontWeight: 'bold' }}>ゲーム</span>
           </Button>
           <Button
             onClick={() => setCurrentScreen('gacha')}
-            variant={currentScreen === 'gacha' ? 'default' : 'ghost'}
-            className="flex-1 h-16 sm:h-20 min-h-[64px] mx-1 text-base sm:text-lg font-bold rounded-2xl transition-all duration-300"
-            style={currentScreen === 'gacha' 
-              ? { backgroundColor: '#ffffff', color: '#ec4899', border: '4px solid #fbbf24', transform: 'scale(1.1)' }
-              : { color: '#ffffff' }
-            }
+            variant="ghost"
+            className="flex-1 h-16 sm:h-20 min-h-[64px] mx-1 transition-all duration-300 flex flex-col items-center justify-center"
+            style={{ 
+              backgroundColor: 'transparent',
+              border: 'none',
+              color: '#ffffff',
+              transform: currentScreen === 'gacha' ? 'scale(1.1)' : 'scale(1)'
+            }}
           >
-            🎰<br className="sm:hidden" /><span className="hidden sm:inline"> </span>ガチャ
+            <img 
+              src={gachaIcon} 
+              alt="ガチャ" 
+              className="block mb-1" 
+              style={{ width: '42px', height: '42px', maxWidth: '42px', maxHeight: '42px' }}
+            />
+            <span style={{ fontSize: '10px', fontWeight: 'bold' }}>ガチャ</span>
           </Button>
           <Button
             onClick={() => setCurrentScreen('collection')}
-            variant={currentScreen === 'collection' ? 'default' : 'ghost'}
-            className="flex-1 h-16 sm:h-20 min-h-[64px] mx-1 text-base sm:text-lg font-bold rounded-2xl transition-all duration-300"
-            style={currentScreen === 'collection' 
-              ? { backgroundColor: '#ffffff', color: '#16a34a', border: '4px solid #fbbf24', transform: 'scale(1.1)' }
-              : { color: '#ffffff' }
-            }
+            variant="ghost"
+            className="flex-1 h-16 sm:h-20 min-h-[64px] mx-1 transition-all duration-300 flex flex-col items-center justify-center"
+            style={{ 
+              backgroundColor: 'transparent',
+              border: 'none',
+              color: '#ffffff',
+              transform: currentScreen === 'collection' ? 'scale(1.1)' : 'scale(1)'
+            }}
           >
-            📚<br className="sm:hidden" /><span className="hidden sm:inline"> </span>図鑑
+            <img 
+              src={zukanIcon} 
+              alt="図鑑" 
+              className="block mb-1" 
+              style={{ height: '42px', maxHeight: '42px', width: 'auto', objectFit: 'contain' }}
+            />
+            <span style={{ fontSize: '10px', fontWeight: 'bold' }}>図鑑</span>
           </Button>
           <Button
             onClick={() => setCurrentScreen('stats')}
-            variant={currentScreen === 'stats' ? 'default' : 'ghost'}
-            className="flex-1 h-16 sm:h-20 min-h-[64px] mx-1 text-base sm:text-lg font-bold rounded-2xl transition-all duration-300"
-            style={currentScreen === 'stats' 
-              ? { backgroundColor: '#ffffff', color: '#ea580c', border: '4px solid #fbbf24', transform: 'scale(1.1)' }
-              : { color: '#ffffff' }
-            }
+            variant="ghost"
+            className="flex-1 h-16 sm:h-20 min-h-[64px] mx-1 transition-all duration-300 flex flex-col items-center justify-center"
+            style={{ 
+              backgroundColor: 'transparent',
+              border: 'none',
+              color: '#ffffff',
+              transform: currentScreen === 'stats' ? 'scale(1.1)' : 'scale(1)'
+            }}
           >
-            📊<br className="sm:hidden" /><span className="hidden sm:inline"> </span>統計
+            <img 
+              src={dataIcon} 
+              alt="データ" 
+              className="block mb-1" 
+              style={{ width: '42px', height: '42px', maxWidth: '42px', maxHeight: '42px' }}
+            />
+            <span style={{ fontSize: '10px', fontWeight: 'bold' }}>データ</span>
           </Button>
         </div>
       </nav>
@@ -190,7 +226,17 @@ function AppContent() {
       case 'gacha':
         return <GachaView />;
       case 'collection':
-        return <CollectionView />;
+        return (
+          <div 
+            style={{ 
+              height: 'calc(100vh - 120px)',
+              padding: '1rem',
+              overflow: 'hidden'
+            }}
+          >
+            <CollectionView />
+          </div>
+        );
       case 'stats':
         return <StatsView />;
       default:
@@ -200,10 +246,14 @@ function AppContent() {
 
   return (
     <div 
-      className="min-h-screen" 
       style={{ 
         background: 'linear-gradient(to bottom right, #f87171, #fde047, #60a5fa)',
-        minHeight: '100vh',
+        height: '100vh',
+        width: '100vw',
+        overflow: 'hidden',
+        position: 'fixed',
+        top: 0,
+        left: 0,
         paddingBottom: currentScreen === 'game' ? '0' : '120px'
       }}
     >

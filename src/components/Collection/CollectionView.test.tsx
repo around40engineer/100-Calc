@@ -103,7 +103,7 @@ describe('CollectionView', () => {
       });
     });
 
-    it('Given ユーザーがポケモンを所持していない When CollectionView が表示される Then 空の状態が表示される', async () => {
+    it('Given ユーザーがポケモンを所持していない When CollectionView が表示される Then 0/1025が表示される', async () => {
       // Given
       vi.mocked(StorageService.loadUserData).mockReturnValue({
         points: 0,
@@ -124,7 +124,7 @@ describe('CollectionView', () => {
 
       // Then
       await waitFor(() => {
-        expect(screen.getByText(/まだポケモンを獲得していません/i)).toBeInTheDocument();
+        expect(screen.getByText(/0\s*\/\s*1025/i)).toBeInTheDocument();
       });
     });
 
@@ -191,7 +191,7 @@ describe('CollectionView', () => {
       });
     });
 
-    it('Given ユーザーが4匹中4匹所持 When 完成度が表示される Then 4/151が表示される', async () => {
+    it('Given ユーザーが4匹中4匹所持 When 完成度が表示される Then 4/1025が表示される', async () => {
       // Given & When
       render(
         <UserProvider>
@@ -201,11 +201,11 @@ describe('CollectionView', () => {
 
       // Then
       await waitFor(() => {
-        expect(screen.getByText(/4\s*\/\s*151/i)).toBeInTheDocument();
+        expect(screen.getByText(/4\s*\/\s*1025/i)).toBeInTheDocument();
       });
     });
 
-    it('Given ユーザーがポケモンを所持していない When 完成度が表示される Then 空の状態メッセージが表示される', async () => {
+    it('Given ユーザーがポケモンを所持していない When 完成度が表示される Then 0.0%が表示される', async () => {
       // Given
       vi.mocked(StorageService.loadUserData).mockReturnValue({
         points: 0,
@@ -226,7 +226,7 @@ describe('CollectionView', () => {
 
       // Then
       await waitFor(() => {
-        expect(screen.getByText(/まだポケモンを獲得していません/i)).toBeInTheDocument();
+        expect(screen.getByText(/0\.0\s*%/i)).toBeInTheDocument();
       });
     });
 
@@ -240,8 +240,8 @@ describe('CollectionView', () => {
 
       // Then
       await waitFor(() => {
-        // 4/151 ≈ 2.65%
-        expect(screen.getByText(/2\.6.*%/i)).toBeInTheDocument();
+        // 4/1025 ≈ 0.39%
+        expect(screen.getByText(/0\.[34].*%/i)).toBeInTheDocument();
       });
     });
 
@@ -271,9 +271,9 @@ describe('CollectionView', () => {
       // Then
       await waitFor(() => {
         const progressBar = screen.getByTestId('completion-progress');
-        // 4/151 ≈ 2.65%
+        // 4/1025 ≈ 0.39%
         const width = progressBar.style.width;
-        expect(width).toMatch(/2\.6.*%/);
+        expect(width).toMatch(/0\.[34].*%/);
       });
     });
   });
@@ -559,7 +559,8 @@ describe('CollectionView', () => {
       // Then
       await waitFor(() => {
         const pokemonCards = screen.getAllByTestId('pokemon-card');
-        expect(pokemonCards).toHaveLength(4);
+        // 全1025匹のカードが表示される（所持・未所持含む）
+        expect(pokemonCards).toHaveLength(1025);
       });
     });
   });
@@ -589,7 +590,7 @@ describe('CollectionView', () => {
       // Then
       await waitFor(() => {
         expect(screen.getByText(/pikachu/i)).toBeInTheDocument();
-        expect(screen.getByText(/1\s*\/\s*151/i)).toBeInTheDocument();
+        expect(screen.getByText(/1\s*\/\s*1025/i)).toBeInTheDocument();
       });
     });
 

@@ -83,11 +83,13 @@ export function CollectionView() {
     return pokemon.rarity === filter;
   });
 
-  const completionPercentage = (userData.ownedPokemon.length / TOTAL_POKEMON) * 100;
+  // 重複を除いたユニークなポケモン数を計算
+  const uniqueOwnedCount = new Set(userData.ownedPokemon).size;
+  const completionPercentage = (uniqueOwnedCount / TOTAL_POKEMON) * 100;
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center" style={{ minHeight: '50vh' }}>
         <div className="flex flex-col items-center space-y-6 p-8 bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl">
           <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
           <div className="text-2xl sm:text-3xl font-bold text-gray-700">ポケモンを読み込み中...</div>
@@ -98,7 +100,7 @@ export function CollectionView() {
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen space-y-6 p-6">
+      <div className="flex flex-col items-center justify-center space-y-6 p-6" style={{ minHeight: '50vh' }}>
         <div className="text-2xl sm:text-3xl text-red-600 font-bold text-center bg-red-100 p-8 rounded-3xl border-4 border-red-400 shadow-xl animate-shake">
           {error}
         </div>
@@ -110,103 +112,108 @@ export function CollectionView() {
   }
 
   return (
-    <div className="mx-auto p-4 sm:p-6 space-y-6 animate-pop-in max-w-7xl">
-      {/* 完成度表示 */}
-      <Card className="shadow-2xl border-4 border-yellow-400 rounded-3xl overflow-hidden bg-gradient-to-br from-red-500 via-yellow-400 to-blue-500">
-        <CardHeader className="bg-gradient-to-br from-green-600 via-emerald-500 to-teal-500 text-white animate-gradient-shift border-b-4 border-yellow-300">
-          <CardTitle className="text-2xl sm:text-3xl font-bold drop-shadow-lg animate-float">📚 コレクション完成度 📚</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6 p-6 bg-gradient-to-br from-yellow-300 via-green-300 to-blue-300">
-          <div className="flex items-center justify-between">
-            <div className="text-5xl sm:text-6xl font-bold text-blue-900 drop-shadow-lg">
-              {userData.ownedPokemon.length} / {TOTAL_POKEMON}
+    <div className="animate-pop-in max-w-full h-full flex flex-col">
+      {/* 固定ヘッダー部分 */}
+      <div className="flex-shrink-0 space-y-6 mb-6">
+        {/* 完成度表示 */}
+        <Card className="shadow-2xl border-4 border-yellow-400 rounded-3xl overflow-hidden bg-gradient-to-br from-red-500 via-yellow-400 to-blue-500">
+          <CardHeader className="bg-gradient-to-br from-green-600 via-emerald-500 to-teal-500 text-white animate-gradient-shift border-b-4 border-yellow-300">
+            <CardTitle className="text-2xl sm:text-3xl font-bold drop-shadow-lg animate-float">📚 コレクション完成度 📚</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6 p-6 bg-gradient-to-br from-yellow-300 via-green-300 to-blue-300">
+            <div className="flex items-center justify-between">
+              <div className="text-5xl sm:text-6xl font-bold text-blue-900 drop-shadow-lg">
+                {uniqueOwnedCount} / {TOTAL_POKEMON}
+              </div>
+              <div className="text-4xl sm:text-5xl text-green-900 font-bold drop-shadow-lg">
+                {completionPercentage.toFixed(1)}%
+              </div>
             </div>
-            <div className="text-4xl sm:text-5xl text-green-900 font-bold drop-shadow-lg">
-              {completionPercentage.toFixed(1)}%
+            
+            {/* プログレスバー */}
+            <div className="w-full bg-gradient-to-r from-gray-200 to-gray-300 rounded-full h-8 sm:h-10 overflow-hidden shadow-inner border-2 border-gray-400">
+              <div
+                data-testid="completion-progress"
+                className="bg-gradient-to-r from-blue-500 via-cyan-500 to-teal-500 h-full transition-all duration-500 shadow-xl animate-gradient-shift"
+                style={{ width: `${completionPercentage}%` }}
+              />
             </div>
-          </div>
-          
-          {/* プログレスバー */}
-          <div className="w-full bg-gradient-to-r from-gray-200 to-gray-300 rounded-full h-8 sm:h-10 overflow-hidden shadow-inner border-2 border-gray-400">
-            <div
-              data-testid="completion-progress"
-              className="bg-gradient-to-r from-blue-500 via-cyan-500 to-teal-500 h-full transition-all duration-500 shadow-xl animate-gradient-shift"
-              style={{ width: `${completionPercentage}%` }}
-            />
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
-      {/* フィルターボタン */}
-      <div className="flex flex-wrap gap-3">
-        <Button
-          onClick={() => setFilter('all')}
-          className={`h-14 sm:h-16 px-6 sm:px-8 text-lg sm:text-xl font-bold rounded-2xl transition-all duration-300 border-2 ${
-            filter === 'all' 
-              ? 'bg-gradient-to-br from-blue-500 via-purple-500 to-pink-600 text-white shadow-xl shadow-blue-500/50 scale-110 border-white/50 animate-gradient-shift' 
-              : 'glass-effect text-gray-700 hover:glass-effect-strong hover:scale-105 border-white/30'
-          }`}
-          variant="ghost"
-        >
-          ✨ すべて
-        </Button>
-        <Button
-          onClick={() => setFilter(Rarity.COMMON)}
-          className={`h-14 sm:h-16 px-6 sm:px-8 text-lg sm:text-xl font-bold rounded-2xl transition-all duration-300 border-2 ${
-            filter === Rarity.COMMON 
-              ? 'bg-gradient-to-br from-gray-400 to-gray-600 text-white shadow-xl shadow-gray-500/50 scale-110 border-white/50' 
-              : 'glass-effect text-gray-700 hover:glass-effect-strong hover:scale-105 border-white/30'
-          }`}
-          variant="ghost"
-        >
-          ノーマル
-        </Button>
-        <Button
-          onClick={() => setFilter(Rarity.RARE)}
-          className={`h-14 sm:h-16 px-6 sm:px-8 text-lg sm:text-xl font-bold rounded-2xl transition-all duration-300 border-2 ${
-            filter === Rarity.RARE 
-              ? 'bg-gradient-to-br from-blue-400 via-cyan-500 to-blue-600 text-white shadow-xl shadow-blue-500/50 scale-110 border-white/50 animate-gradient-shift' 
-              : 'glass-effect text-gray-700 hover:glass-effect-strong hover:scale-105 border-white/30'
-          }`}
-          variant="ghost"
-        >
-          レア
-        </Button>
-        <Button
-          onClick={() => setFilter(Rarity.LEGENDARY)}
-          className={`h-14 sm:h-16 px-6 sm:px-8 text-lg sm:text-xl font-bold rounded-2xl transition-all duration-300 border-2 ${
-            filter === Rarity.LEGENDARY 
-              ? 'bg-gradient-to-br from-yellow-400 via-amber-500 to-orange-600 text-white shadow-xl shadow-yellow-500/50 scale-110 border-white/50 animate-sparkle animate-gradient-shift' 
-              : 'glass-effect text-gray-700 hover:glass-effect-strong hover:scale-105 border-white/30'
-          }`}
-          variant="ghost"
-        >
-          ⭐ レジェンド
-        </Button>
+        {/* フィルターボタン */}
+        <div className="flex flex-wrap gap-3">
+          <Button
+            onClick={() => setFilter('all')}
+            className={`h-14 sm:h-16 px-6 sm:px-8 text-lg sm:text-xl font-bold rounded-2xl transition-all duration-300 border-2 ${
+              filter === 'all' 
+                ? 'bg-gradient-to-br from-blue-500 via-purple-500 to-pink-600 text-white shadow-xl shadow-blue-500/50 scale-110 border-white/50 animate-gradient-shift' 
+                : 'glass-effect text-gray-700 hover:glass-effect-strong hover:scale-105 border-white/30'
+            }`}
+            variant="ghost"
+          >
+            ✨ すべて
+          </Button>
+          <Button
+            onClick={() => setFilter(Rarity.COMMON)}
+            className={`h-14 sm:h-16 px-6 sm:px-8 text-lg sm:text-xl font-bold rounded-2xl transition-all duration-300 border-2 ${
+              filter === Rarity.COMMON 
+                ? 'bg-gradient-to-br from-gray-400 to-gray-600 text-white shadow-xl shadow-gray-500/50 scale-110 border-white/50' 
+                : 'glass-effect text-gray-700 hover:glass-effect-strong hover:scale-105 border-white/30'
+            }`}
+            variant="ghost"
+          >
+            ノーマル
+          </Button>
+          <Button
+            onClick={() => setFilter(Rarity.RARE)}
+            className={`h-14 sm:h-16 px-6 sm:px-8 text-lg sm:text-xl font-bold rounded-2xl transition-all duration-300 border-2 ${
+              filter === Rarity.RARE 
+                ? 'bg-gradient-to-br from-blue-400 via-cyan-500 to-blue-600 text-white shadow-xl shadow-blue-500/50 scale-110 border-white/50 animate-gradient-shift' 
+                : 'glass-effect text-gray-700 hover:glass-effect-strong hover:scale-105 border-white/30'
+            }`}
+            variant="ghost"
+          >
+            レア
+          </Button>
+          <Button
+            onClick={() => setFilter(Rarity.LEGENDARY)}
+            className={`h-14 sm:h-16 px-6 sm:px-8 text-lg sm:text-xl font-bold rounded-2xl transition-all duration-300 border-2 ${
+              filter === Rarity.LEGENDARY 
+                ? 'bg-gradient-to-br from-yellow-400 via-amber-500 to-orange-600 text-white shadow-xl shadow-yellow-500/50 scale-110 border-white/50 animate-sparkle animate-gradient-shift' 
+                : 'glass-effect text-gray-700 hover:glass-effect-strong hover:scale-105 border-white/30'
+            }`}
+            variant="ghost"
+          >
+            ⭐ レジェンド
+          </Button>
+        </div>
       </div>
 
-      {/* ポケモングリッド */}
-      {filteredPokemon.length === 0 ? (
-        <div className="text-center py-16 text-xl sm:text-2xl text-gray-600 font-semibold bg-white rounded-2xl shadow-lg p-8">
-          該当するポケモンがいません
-        </div>
-      ) : (
-        <div
-          data-testid="pokemon-grid"
-          className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6"
-        >
-          {filteredPokemon.map(pokemon => {
-            const isOwned = userData.ownedPokemon.includes(pokemon.id);
-            return (
-              <PokemonCard
-                key={pokemon.id}
-                pokemon={pokemon}
-                isOwned={isOwned}
-              />
-            );
-          })}
-        </div>
-      )}
+      {/* スクロール可能なポケモングリッド部分 */}
+      <div className="flex-1 overflow-y-auto overflow-x-hidden hide-scrollbar">
+        {filteredPokemon.length === 0 ? (
+          <div className="text-center py-16 text-xl sm:text-2xl text-gray-600 font-semibold bg-white rounded-2xl shadow-lg p-8">
+            該当するポケモンがいません
+          </div>
+        ) : (
+          <div
+            data-testid="pokemon-grid"
+            className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6 pb-6"
+          >
+            {filteredPokemon.map(pokemon => {
+              const isOwned = userData.ownedPokemon.includes(pokemon.id);
+              return (
+                <PokemonCard
+                  key={pokemon.id}
+                  pokemon={pokemon}
+                  isOwned={isOwned}
+                />
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -79,7 +79,7 @@ export function GachaView() {
   };
 
   return (
-    <div className="container mx-auto p-4 sm:p-6 max-w-2xl animate-pop-in">
+    <div className="max-w-2xl animate-pop-in">
       <Card className="shadow-2xl border-4 border-yellow-400 rounded-3xl overflow-hidden bg-gradient-to-br from-red-500 via-yellow-400 to-blue-500">
         <CardHeader className="bg-gradient-to-br from-red-600 via-orange-500 to-yellow-500 text-white animate-gradient-shift border-b-4 border-yellow-300">
           <CardTitle className="text-3xl sm:text-4xl text-center font-bold drop-shadow-lg animate-float">🎰 ポケモンガチャ 🎰</CardTitle>

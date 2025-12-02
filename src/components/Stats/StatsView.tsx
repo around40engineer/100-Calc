@@ -43,8 +43,8 @@ export function StatsView() {
   const progressPercentage = (clearedLevelsCount / 20) * 100;
 
   return (
-    <div className="container mx-auto p-4 sm:p-6 space-y-6">
-      <h1 className="text-4xl sm:text-5xl font-bold text-center mb-8 text-white drop-shadow-[0_4px_8px_rgba(0,0,0,0.3)]">
+    <div>
+      <h1 className="m-0 text-4xl sm:text-5xl font-bold text-center text-white drop-shadow-[0_4px_8px_rgba(0,0,0,0.3)]">
         📊 統計
       </h1>
 

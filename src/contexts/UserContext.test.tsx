@@ -324,7 +324,7 @@ describe('UserContext', () => {
       expect(result.current.userData.ownedPokemon).toEqual([1, 25]);
     });
 
-    it('Given ユーザーがポケモンID 25を持っている When 同じポケモンID 25を追加する Then 重複して追加される', () => {
+    it('Given ユーザーがポケモンID 25を持っている When 同じポケモンID 25を追加する Then 重複せず追加されない', () => {
       // Given
       vi.mocked(StorageService.loadUserData).mockReturnValue({
         points: 0,
@@ -358,8 +358,8 @@ describe('UserContext', () => {
       });
 
       // Then
-      expect(result.current.userData.ownedPokemon).toEqual([25, 25]);
-      expect(result.current.userData.ownedPokemon).toHaveLength(2);
+      expect(result.current.userData.ownedPokemon).toEqual([25]);
+      expect(result.current.userData.ownedPokemon).toHaveLength(1);
     });
   });
 
@@ -694,7 +694,7 @@ describe('UserContext', () => {
       expect(result.current.isLevelUnlocked(7)).toBe(false);
     });
 
-    it('Given レベル20をクリアする When updateLevelStatsを呼ぶ Then highestUnlockedLevelは20のまま', () => {
+    it('Given レベル20をクリアする When updateLevelStatsを呼ぶ Then レベル21がアンロックされる', () => {
       // Given
       vi.mocked(StorageService.loadUserData).mockReturnValue({
         points: 0,
@@ -729,7 +729,7 @@ describe('UserContext', () => {
       });
 
       // Then
-      expect(result.current.userData.highestUnlockedLevel).toBe(20);
+      expect(result.current.userData.highestUnlockedLevel).toBe(21);
     });
 
     it('Given レベル3がアンロック済みである When レベル1をクリアする Then highestUnlockedLevelは3のまま', () => {

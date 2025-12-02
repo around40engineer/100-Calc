@@ -49,11 +49,16 @@ function userReducer(state: UserData, action: UserAction): UserData {
       };
     }
 
-    case 'ADD_POKEMON':
+    case 'ADD_POKEMON': {
+      // 重複チェック: 既に所持している場合は追加しない
+      if (state.ownedPokemon.includes(action.payload)) {
+        return state;
+      }
       return {
         ...state,
         ownedPokemon: [...state.ownedPokemon, action.payload]
       };
+    }
 
     case 'UPDATE_STATS': {
       const { difficulty, completionTime, isCompleted } = action.payload;

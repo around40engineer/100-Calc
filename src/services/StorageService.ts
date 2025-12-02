@@ -42,6 +42,11 @@ export class StorageService {
       parsedData.highestUnlockedLevel = 1 as DifficultyLevel;
     }
     
+    // ownedPokemonの重複を削除（マイグレーション）
+    const originalLength = parsedData.ownedPokemon.length;
+    parsedData.ownedPokemon = Array.from(new Set(parsedData.ownedPokemon));
+    const hasDuplicates = originalLength !== parsedData.ownedPokemon.length;
+    
     // 既存の統計データがあり、まだマイグレーションされていない場合のみマイグレーション
     const needsMigration = parsedData.stats && 
       Object.keys(parsedData.levelStats).length === 0 &&
@@ -54,6 +59,11 @@ export class StorageService {
       // マイグレーション後のデータを保存
       this.saveUserData(migrated);
       return migrated;
+    }
+    
+    // 重複が削除された場合は保存
+    if (hasDuplicates) {
+      this.saveUserData(parsedData);
     }
     
     return parsedData;

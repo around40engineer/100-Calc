@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+/* デフォルトマージンをリセット */
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+}
+
 /* カスタムアニメーション */
 @keyframes bounce-in {
   0% {
@@ -216,12 +221,25 @@
 
 /* 子供向けの大きなフォントとスペーシング */
 body {
+  margin: 0;
+  padding: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   touch-action: manipulation; /* タッチ操作の最適化 */
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+}
+
+html {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
 }
 
 /* スクロールバーのスタイリング（子供向けに明るく） */
@@ -243,6 +261,16 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(to bottom, #7c3aed, #db2777);
+}
+
+/* スクロールバーを非表示にするクラス */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
 }
 
 /* フォーカス時のアクセシビリティ向上 */

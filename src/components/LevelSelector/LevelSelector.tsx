@@ -5,6 +5,7 @@ import { PokeApiService } from '../../services/PokeApiService';
 import { useUser } from '../../contexts/UserContext';
 import { Button } from '../ui/button';
 import { Lock, Check, Clock } from 'lucide-react';
+import titleLogo from '../../assets/titleLogo.png';
 
 interface LevelSelectorProps {
   onStart: (level: DifficultyLevel, pokemon: Pokemon) => void;
@@ -121,12 +122,17 @@ export function LevelSelector({ onStart }: LevelSelectorProps) {
   const levels = Array.from({ length: 100 }, (_, i) => (i + 1) as DifficultyLevel);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4 sm:p-6">
+    <div className="flex flex-col items-center justify-center min-h-screen">
       <div className="w-full max-w-4xl space-y-8 animate-pop-in">
         <div className="text-center space-y-4">
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-4 animate-float drop-shadow-[0_6px_12px_rgba(0,0,0,0.5)] [text-shadow:_3px_3px_0_rgb(0_0_0_/_40%)]">
-            ⚡ ポケモン100マス計算 ⚡
-          </h1>
+          <div className="flex justify-center mb-4 animate-float">
+            <img 
+              src={titleLogo} 
+              alt="ポケモン100マス計算" 
+              className="max-w-full h-auto drop-shadow-[0_6px_12px_rgba(0,0,0,0.5)]"
+              style={{ maxHeight: '120px' }}
+            />
+          </div>
           <p className="text-xl sm:text-2xl text-white font-bold drop-shadow-[0_4px_8px_rgba(0,0,0,0.4)] [text-shadow:_2px_2px_0_rgb(0_0_0_/_30%)]">
             ✨ レベルを選んでね！ ✨
           </p>
