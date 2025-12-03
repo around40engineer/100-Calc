@@ -1508,3 +1508,229 @@ interface LevelConfig {
 3. **フォントサイズ**
    - 読みやすい大きめのフォント
    - 十分なコントラスト比
+
+
+## データエクスポート/インポート機能
+
+### 概要
+
+ユーザーが別の端末でもゲームデータを引き継げるように、ローカルストレージのデータをエクスポート/インポートする機能を提供します。
+
+### データ構造
+
+エクスポートされるJSONファイルの構造：
+
+```typescript
+interface ExportData {
+  version: string;              // データフォーマットのバージョン
+  exportDate: string;           // エクスポート日時（ISO 8601形式）
+  userData: {
+    points: number;
+    ownedPokemon: number[];
+    highestUnlockedLevel: number;
+    levelStats: Record<string, LevelStats>;
+  };
+}
+```
+
+### StorageService拡張
+
+```typescript
+class StorageService {
+  // 既存のメソッド...
+  
+  /**
+   * ユーザーデータをエクスポート
+   * @returns エクスポート用のJSONデータ
+   */
+  static exportUserData(): ExportData {
+    const userData = this.getUserData();
+    return {
+      version: '1.0',
+      exportDate: new Date().toISOString(),
+      userData
+    };
+  }
+  
+  /**
+   * エクスポートデータをJSONファイルとしてダウンロード
+   */
+  static downloadExportFile(): void {
+    const data = this.exportUserData();
+    const json = JSON.stringify(data, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    const timestamp = new Date().toISOString().split('T')[0];
+    link.href = url;
+    link.download = `pokemon-math-data-${timestamp}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+  
+  /**
+   * インポートデータの検証
+   * @param data インポートするデータ
+   * @returns 検証結果
+   */
+  static validateImportData(data: any): { valid: boolean; error?: string } {
+    // バージョンチェック
+    if (!data.version || typeof data.version !== 'string') {
+      return { valid: false, error: 'バージョン情報が見つかりません' };
+    }
+    
+    // userDataの存在チェック
+    if (!data.userData || typeof data.userData !== 'object') {
+      return { valid: false, error: 'ユーザーデータが見つかりません' };
+    }
+    
+    // 必須フィールドのチェック
+    const { userData } = data;
+    if (typeof userData.points !== 'number') {
+      return { valid: false, error: 'ポイントデータが不正です' };
+    }
+    if (!Array.isArray(userData.ownedPokemon)) {
+      return { valid: false, error: 'ポケモンデータが不正です' };
+    }
+    if (typeof userData.highestUnlockedLevel !== 'number') {
+      return { valid: false, error: 'レベルデータが不正です' };
+    }
+    
+    return { valid: true };
+  }
+  
+  /**
+   * ユーザーデータをインポート
+   * @param data インポートするデータ
+   * @returns インポート成功の可否
+   */
+  static importUserData(data: ExportData): boolean {
+    const validation = this.validateImportData(data);
+    if (!validation.valid) {
+      throw new Error(validation.error);
+    }
+    
+    // データを保存
+    this.saveUserData(data.userData);
+    return true;
+  }
+}
+```
+
+### UI実装（StatsView拡張）
+
+StatsViewに「データ管理」セクションを追加：
+
+```typescript
+// StatsView.tsx に追加
+const [showImportDialog, setShowImportDialog] = useState(false);
+const [importError, setImportError] = useState<string | null>(null);
+const fileInputRef = useRef<HTMLInputElement>(null);
+
+const handleExport = () => {
+  try {
+    StorageService.downloadExportFile();
+    // 成功メッセージを表示
+  } catch (error) {
+    // エラーメッセージを表示
+  }
+};
+
+const handleImportClick = () => {
+  fileInputRef.current?.click();
+};
+
+const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const file = event.target.files?.[0];
+  if (!file) return;
+  
+  try {
+    const text = await file.text();
+    const data = JSON.parse(text);
+    
+    // 検証
+    const validation = StorageService.validateImportData(data);
+    if (!validation.valid) {
+      setImportError(validation.error || '不正なファイルです');
+      return;
+    }
+    
+    // 確認ダイアログを表示
+    setShowImportDialog(true);
+    // dataを一時保存
+  } catch (error) {
+    setImportError('ファイルの読み込みに失敗しました');
+  }
+};
+
+const handleConfirmImport = (data: ExportData) => {
+  try {
+    StorageService.importUserData(data);
+    // リロードして新しいデータを反映
+    window.location.reload();
+  } catch (error) {
+    setImportError('インポートに失敗しました');
+  }
+};
+```
+
+### セキュリティとバリデーション
+
+1. **データ検証**
+   - 必須フィールドの存在確認
+   - データ型の検証
+   - 値の範囲チェック（ポイントが負でない、レベルが1-100の範囲など）
+
+2. **エラーハンドリング**
+   - ファイル読み込みエラー
+   - JSON解析エラー
+   - データ検証エラー
+   - 保存エラー
+
+3. **ユーザー確認**
+   - インポート前に既存データが上書きされることを警告
+   - キャンセルオプションの提供
+
+### ユーザーフロー
+
+#### エクスポート
+1. ユーザーが統計画面の「データをエクスポート」ボタンをタップ
+2. システムが現在のデータをJSON形式で生成
+3. ファイルが自動的にダウンロードされる
+4. 成功メッセージを表示
+
+#### インポート
+1. ユーザーが統計画面の「データをインポート」ボタンをタップ
+2. ファイル選択ダイアログが表示される
+3. ユーザーがJSONファイルを選択
+4. システムがファイルを検証
+5. 検証成功時、確認ダイアログを表示
+6. ユーザーが確認すると、データがインポートされる
+7. アプリがリロードされ、新しいデータが反映される
+
+### エラーメッセージ
+
+- 「ファイルの読み込みに失敗しました」
+- 「不正なファイル形式です」
+- 「バージョン情報が見つかりません」
+- 「ユーザーデータが見つかりません」
+- 「データが破損しています」
+- 「インポートに失敗しました」
+
+### 正常性プロパティ
+
+**Property 1: エクスポートデータの完全性**
+*For any* ユーザーデータ、エクスポートしたデータには全ての必須フィールド（points, ownedPokemon, highestUnlockedLevel, levelStats）が含まれている
+**Validates: Requirements 10.4**
+
+**Property 2: インポート/エクスポートのラウンドトリップ**
+*For any* 有効なユーザーデータ、エクスポートしてからインポートすると元のデータと同じ状態になる
+**Validates: Requirements 10.2, 10.9**
+
+**Property 3: 不正データの拒否**
+*For any* 不正なフォーマットのデータ、インポート時に検証エラーが発生しデータは保存されない
+**Validates: Requirements 10.11**
+
+**Property 4: ファイル名の一意性**
+*For any* エクスポート操作、生成されるファイル名にはタイムスタンプが含まれ、同じ日に複数回エクスポートしても区別できる
+**Validates: Requirements 10.3**

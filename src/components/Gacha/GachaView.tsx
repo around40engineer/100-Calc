@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useUser } from '../../contexts/UserContext';
 import { GachaService } from '../../services/GachaService';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
 import { Rarity, type Pokemon } from '../../types';
+import gachaActionVideo from '../../assets/gachaAction.mov';
 
 const GACHA_COST = 100;
 
@@ -14,6 +15,8 @@ export function GachaView() {
   const [error, setError] = useState<string | null>(null);
   const [resultPokemon, setResultPokemon] = useState<Pokemon | null>(null);
   const [showResult, setShowResult] = useState(false);
+  const [showVideo, setShowVideo] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   const canPullGacha = userData.points >= GACHA_COST;
 
@@ -32,16 +35,29 @@ export function GachaView() {
         // ポケモンをコレクションに追加
         addPokemon(result.pokemon.id);
         
-        // 結果を表示
+        // 結果を保存
         setResultPokemon(result.pokemon);
-        setShowResult(true);
+        
+        // 動画を表示して再生
+        setShowVideo(true);
+        setIsLoading(false);
+        
+        // 動画の再生を開始
+        if (videoRef.current) {
+          videoRef.current.play();
+        }
       }
     } catch (err) {
       setError('エラーが発生しました。もう一度お試しください。');
       console.error('Gacha error:', err);
-    } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleVideoEnd = () => {
+    // 動画が終わったら結果を表示
+    setShowVideo(false);
+    setShowResult(true);
   };
 
   const handleCloseResult = () => {
@@ -166,6 +182,39 @@ export function GachaView() {
           </div>
         </CardContent>
       </Card>
+
+      {/* 動画再生ダイアログ */}
+      {showVideo && (
+        <div 
+          style={{ 
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            width: '100vw',
+            height: '100vh',
+            backgroundColor: '#000000',
+            zIndex: 9999,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          <video
+            ref={videoRef}
+            src={gachaActionVideo}
+            style={{ 
+              width: '100%',
+              height: '100%',
+              objectFit: 'contain'
+            }}
+            onEnded={handleVideoEnd}
+            playsInline
+            autoPlay
+          />
+        </div>
+      )}
 
       {/* 結果表示ダイアログ */}
       <Dialog open={showResult} onOpenChange={setShowResult}>

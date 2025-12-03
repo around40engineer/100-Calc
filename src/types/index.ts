@@ -132,3 +132,10 @@ export interface Reward {
   points: number;
   pokemon?: Pokemon;
 }
+
+// エクスポートデータ
+export interface ExportData {
+  version: string;
+  exportDate: string;
+  userData: UserData;
+}

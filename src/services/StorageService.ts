@@ -1,4 +1,4 @@
-import { Difficulty, type UserData, type DifficultyLevel, type LevelStats } from '../types';
+import { Difficulty, type UserData, type DifficultyLevel, type LevelStats, type ExportData } from '../types';
 
 export class StorageService {
   private static readonly KEYS = {
@@ -164,5 +164,44 @@ export class StorageService {
       levelStats: {},
       highestUnlockedLevel: 1 as DifficultyLevel
     };
+  }
+
+  /**
+   * 現在のユーザーデータをエクスポート用の形式で取得
+   */
+  static exportUserData(): ExportData {
+    const userData = this.loadUserData();
+    const now = new Date();
+    
+    return {
+      version: '1.0.0',
+      exportDate: now.toISOString(),
+      userData
+    };
+  }
+
+  /**
+   * エクスポートデータをJSONファイルとしてダウンロード
+   */
+  static downloadExportFile(): void {
+    const exportData = this.exportUserData();
+    const jsonString = JSON.stringify(exportData, null, 2);
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    
+    // タイムスタンプを含むファイル名を生成
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+    const filename = `pokemon-math-data-${timestamp}.json`;
+    
+    // ダウンロードリンクを作成してクリック
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    
+    // クリーンアップ
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   }
 }

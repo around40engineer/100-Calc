@@ -224,7 +224,17 @@ function AppContent() {
           </div>
         );
       case 'gacha':
-        return <GachaView />;
+        return (
+          <div 
+            style={{ 
+              height: 'calc(100vh - 120px)',
+              padding: '1rem',
+              overflow: 'hidden'
+            }}
+          >
+            <GachaView />
+          </div>
+        );
       case 'collection':
         return (
           <div 
